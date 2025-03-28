@@ -8,7 +8,8 @@ import {
   onAuthStateChanged, 
   GoogleAuthProvider, 
   signInWithPopup,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  updateProfile
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '@/lib/firebase';
@@ -54,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       // Update user profile
-      await user.updateProfile({
+      await updateProfile(user, {
         displayName: displayName
       });
 

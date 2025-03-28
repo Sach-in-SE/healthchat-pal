@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Google, Mail, LogIn } from 'lucide-react';
+import { Mail, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -100,7 +100,7 @@ const Login = () => {
               onClick={handleGoogleSignIn}
               disabled={loading}
             >
-              <Google className="mr-2 h-4 w-4" />
+              <Mail className="mr-2 h-4 w-4" />
               Continue with Google
             </Button>
           </div>
