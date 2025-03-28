@@ -6,8 +6,4 @@ import './index.css'
 import './lib/firebase' // Import Firebase initialization
 
 const root = createRoot(document.getElementById("root")!)
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-)
+root.render(<App />)
