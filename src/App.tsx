@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { AuthProvider } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
 
 const queryClient = new QueryClient();
@@ -24,57 +25,59 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              {/* Public routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+        <LanguageProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                {/* Public routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
 
-              {/* Protected routes */}
-              <Route path="/" element={
-                <PrivateRoute>
-                  <Index />
-                </PrivateRoute>
-              } />
-              <Route path="/chat" element={
-                <PrivateRoute>
-                  <Chat />
-                </PrivateRoute>
-              } />
-              <Route path="/history" element={
-                <PrivateRoute>
-                  <History />
-                </PrivateRoute>
-              } />
-              <Route path="/symptoms" element={
-                <PrivateRoute>
-                  <Symptoms />
-                </PrivateRoute>
-              } />
-              <Route path="/diet" element={
-                <PrivateRoute>
-                  <Diet />
-                </PrivateRoute>
-              } />
-              <Route path="/mental-health" element={
-                <PrivateRoute>
-                  <MentalHealth />
-                </PrivateRoute>
-              } />
-              <Route path="/profile" element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              } />
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </AuthProvider>
+                {/* Protected routes */}
+                <Route path="/" element={
+                  <PrivateRoute>
+                    <Index />
+                  </PrivateRoute>
+                } />
+                <Route path="/chat" element={
+                  <PrivateRoute>
+                    <Chat />
+                  </PrivateRoute>
+                } />
+                <Route path="/history" element={
+                  <PrivateRoute>
+                    <History />
+                  </PrivateRoute>
+                } />
+                <Route path="/symptoms" element={
+                  <PrivateRoute>
+                    <Symptoms />
+                  </PrivateRoute>
+                } />
+                <Route path="/diet" element={
+                  <PrivateRoute>
+                    <Diet />
+                  </PrivateRoute>
+                } />
+                <Route path="/mental-health" element={
+                  <PrivateRoute>
+                    <MentalHealth />
+                  </PrivateRoute>
+                } />
+                <Route path="/profile" element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                } />
+                
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

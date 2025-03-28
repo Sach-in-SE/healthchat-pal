@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import LanguageSelector from "./LanguageSelector";
+import { FormattedMessage } from "react-intl";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -44,6 +46,7 @@ const Header = () => {
       <div className="flex h-14 items-center px-4">
         <SidebarTrigger />
         <div className="ml-auto flex items-center space-x-4">
+          <LanguageSelector />
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
@@ -80,16 +83,16 @@ const Header = () => {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/profile")}>
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span><FormattedMessage id="profile.user" /></span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/profile")}>
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span><FormattedMessage id="profile.settings" /></span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span><FormattedMessage id="auth.logout" /></span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
