@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MainLayout from "@/components/layouts/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,28 +31,86 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Pencil, User } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const Profile = () => {
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   
-  // Mock user profile data
+  // Default profile data
   const [profile, setProfile] = useState({
-    name: "Alex Johnson",
-    email: "alex.johnson@example.com",
-    dob: "1985-06-15",
+    name: "",
+    email: "",
+    dob: "",
     gender: "male",
-    height: "175",
-    weight: "70",
-    bloodType: "O+",
-    medicalConditions: "Mild asthma, seasonal allergies",
-    medications: "Albuterol (as needed), Loratadine (10mg daily during spring/summer)",
-    allergies: "Pollen, dust, penicillin",
-    familyHistory: "Father: Type 2 diabetes, Mother: Hypertension",
+    height: "",
+    weight: "",
+    bloodType: "unknown",
+    medicalConditions: "",
+    medications: "",
+    allergies: "",
+    familyHistory: "",
     language: "en",
     notificationsEnabled: true,
     dataSharing: false,
   });
+  
+  // Fetch user profile data from Firestore
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!currentUser) return;
+      
+      try {
+        setLoading(true);
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          // Merge userData with existing profile structure, preserving defaults for missing fields
+          setProfile(prev => ({
+            ...prev,
+            name: userData.displayName || currentUser.displayName || prev.name,
+            email: userData.email || currentUser.email || prev.email,
+            dob: userData.dob || prev.dob,
+            gender: userData.gender || prev.gender,
+            height: userData.height || prev.height,
+            weight: userData.weight || prev.weight,
+            bloodType: userData.bloodType || prev.bloodType,
+            medicalConditions: userData.medicalConditions || prev.medicalConditions,
+            medications: userData.medications || prev.medications,
+            allergies: userData.allergies || prev.allergies,
+            familyHistory: userData.familyHistory || prev.familyHistory,
+            language: userData.language || prev.language,
+            notificationsEnabled: userData.notificationsEnabled ?? prev.notificationsEnabled,
+            dataSharing: userData.dataSharing ?? prev.dataSharing,
+          }));
+        } else {
+          // If no profile exists yet, set name and email from auth user
+          setProfile(prev => ({
+            ...prev,
+            name: currentUser.displayName || prev.name,
+            email: currentUser.email || prev.email,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load profile information.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [currentUser, toast]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -67,13 +125,56 @@ const Profile = () => {
     setProfile(prev => ({ ...prev, [name]: checked }));
   };
   
-  const handleSaveChanges = () => {
-    setIsEditing(false);
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully.",
-    });
+  const handleSaveChanges = async () => {
+    if (!currentUser) return;
+    
+    try {
+      setLoading(true);
+      const userDocRef = doc(db, "users", currentUser.uid);
+      
+      await updateDoc(userDocRef, {
+        displayName: profile.name,
+        dob: profile.dob,
+        gender: profile.gender,
+        height: profile.height,
+        weight: profile.weight,
+        bloodType: profile.bloodType,
+        medicalConditions: profile.medicalConditions,
+        medications: profile.medications,
+        allergies: profile.allergies,
+        familyHistory: profile.familyHistory,
+        language: profile.language,
+        notificationsEnabled: profile.notificationsEnabled,
+        dataSharing: profile.dataSharing,
+        updatedAt: new Date(),
+      });
+      
+      setIsEditing(false);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully.",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update profile information.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+  
+  if (loading && !profile.name) {
+    return (
+      <MainLayout>
+        <div className="container py-6 flex justify-center items-center min-h-[60vh]">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-health-primary border-t-transparent"></div>
+        </div>
+      </MainLayout>
+    );
+  }
   
   return (
     <MainLayout>
@@ -82,11 +183,11 @@ const Profile = () => {
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                {profile.name.split(' ').map(n => n[0]).join('')}
+                {profile.name ? profile.name.split(' ').map(n => n[0]).join('') : <User />}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold">{profile.name}</h1>
+              <h1 className="text-2xl font-bold">{profile.name || "User"}</h1>
               <p className="text-muted-foreground">{profile.email}</p>
             </div>
           </div>
@@ -94,6 +195,7 @@ const Profile = () => {
           <Button 
             variant={isEditing ? "outline" : "default"} 
             onClick={() => setIsEditing(!isEditing)}
+            disabled={loading}
           >
             {isEditing ? (
               "Cancel Editing"

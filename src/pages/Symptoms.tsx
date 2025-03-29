@@ -17,10 +17,68 @@ const commonSymptoms = [
   "Body aches", "Chills", "Congestion", "Loss of taste or smell"
 ];
 
+// Symptom-disease mapping for better suggestions
+const symptomDiseaseMap: Record<string, string[]> = {
+  "Headache": ["Common Cold", "Flu", "Migraine", "Stress", "Dehydration"],
+  "Fever": ["Common Cold", "Flu", "COVID-19", "Infection", "Pneumonia"],
+  "Cough": ["Common Cold", "Flu", "COVID-19", "Asthma", "Bronchitis"],
+  "Fatigue": ["Common Cold", "Flu", "Depression", "Anemia", "Chronic Fatigue Syndrome"],
+  "Sore throat": ["Strep Throat", "Common Cold", "Flu", "Tonsillitis"],
+  "Shortness of breath": ["Asthma", "COVID-19", "Pneumonia", "Anxiety", "Heart Failure"],
+  "Nausea": ["Food Poisoning", "Gastroenteritis", "Morning Sickness", "Migraine"],
+  "Vomiting": ["Food Poisoning", "Gastroenteritis", "Migraine", "Motion Sickness"],
+  "Diarrhea": ["Food Poisoning", "Gastroenteritis", "IBS", "Crohn's Disease"],
+  "Body aches": ["Flu", "Common Cold", "Fibromyalgia", "Chronic Fatigue Syndrome"],
+  "Chills": ["Flu", "Infection", "Fever", "Pneumonia"],
+  "Congestion": ["Common Cold", "Allergies", "Sinusitis", "Flu"],
+  "Loss of taste or smell": ["COVID-19", "Common Cold", "Sinusitis", "Zinc Deficiency"]
+};
+
+// Diet recommendations based on conditions
+const dietRecommendations: Record<string, string[]> = {
+  "Common Cold": [
+    "Stay hydrated with warm fluids like chicken soup and herbal teas",
+    "Foods rich in vitamin C like citrus fruits, berries, and leafy greens",
+    "Foods with zinc such as nuts, seeds, and legumes",
+    "Honey and ginger to soothe sore throat"
+  ],
+  "Flu": [
+    "Clear broths to stay hydrated and replenish electrolytes",
+    "Bland foods like toast, rice, and bananas if experiencing nausea",
+    "Foods rich in vitamin C and zinc to support immune function",
+    "Avoid caffeine and alcohol which can dehydrate"
+  ],
+  "COVID-19": [
+    "Protein-rich foods to maintain strength",
+    "Vitamin D foods like fatty fish and eggs",
+    "Anti-inflammatory foods like berries, fatty fish, and turmeric",
+    "Stay well-hydrated and consider electrolyte drinks if experiencing fever"
+  ],
+  "Migraine": [
+    "Avoid trigger foods like aged cheeses, processed meats, and alcohol",
+    "Maintain regular eating schedule to prevent low blood sugar",
+    "Stay hydrated with water throughout the day",
+    "Foods rich in magnesium like dark leafy greens, nuts, and seeds"
+  ],
+  "Food Poisoning": [
+    "Clear liquids until vomiting subsides",
+    "BRAT diet (bananas, rice, applesauce, toast) for mild symptoms",
+    "Gradually reintroduce bland foods",
+    "Avoid dairy, fatty, and spicy foods until fully recovered"
+  ],
+  "Allergies": [
+    "Anti-inflammatory foods like turmeric, ginger, and berries",
+    "Foods rich in quercetin like apples, onions, and green tea",
+    "Avoid common allergens like dairy, gluten, or nuts if sensitive",
+    "Probiotic foods like yogurt and fermented vegetables for gut health"
+  ]
+};
+
 const Symptoms = () => {
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
+  const [currentTab, setCurrentTab] = useState("select");
   
   const filteredSymptoms = commonSymptoms.filter(symptom => 
     symptom.toLowerCase().includes(searchTerm.toLowerCase())
@@ -38,7 +96,46 @@ const Symptoms = () => {
     e.preventDefault();
     if (selectedSymptoms.length > 0) {
       setShowResults(true);
+      setCurrentTab("results");
     }
+  };
+
+  // Generate possible conditions based on selected symptoms
+  const getPossibleConditions = () => {
+    if (selectedSymptoms.length === 0) return [];
+    
+    // Count disease occurrences across all selected symptoms
+    const diseaseCount: Record<string, number> = {};
+    
+    selectedSymptoms.forEach(symptom => {
+      const diseases = symptomDiseaseMap[symptom] || [];
+      diseases.forEach(disease => {
+        diseaseCount[disease] = (diseaseCount[disease] || 0) + 1;
+      });
+    });
+    
+    // Sort by occurrence count (highest first) and take top 3
+    return Object.entries(diseaseCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([disease]) => disease);
+  };
+
+  // Get diet recommendations for possible conditions
+  const getDietRecommendations = () => {
+    const possibleConditions = getPossibleConditions();
+    const recommendations: string[] = [];
+    
+    possibleConditions.forEach(condition => {
+      const diets = dietRecommendations[condition] || [];
+      diets.forEach(diet => {
+        if (!recommendations.includes(diet)) {
+          recommendations.push(diet);
+        }
+      });
+    });
+    
+    return recommendations.slice(0, 5); // Limit to top 5 recommendations
   };
   
   return (
@@ -55,7 +152,7 @@ const Symptoms = () => {
           </AlertDescription>
         </Alert>
         
-        <Tabs defaultValue="select">
+        <Tabs value={currentTab} onValueChange={setCurrentTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="select">Select Symptoms</TabsTrigger>
             <TabsTrigger value="results" disabled={!showResults}>Results</TabsTrigger>
@@ -157,38 +254,16 @@ const Symptoms = () => {
                       These conditions are possibilities based on your symptoms. This is not a diagnosis.
                     </p>
                     
-                    {/* Mock results based on common symptoms */}
-                    {selectedSymptoms.includes("Headache") && selectedSymptoms.includes("Fever") && (
-                      <div className="p-3 border rounded-md mb-2">
-                        <div className="font-medium">Common Cold or Flu</div>
+                    {getPossibleConditions().map((condition) => (
+                      <div key={condition} className="p-3 border rounded-md mb-2">
+                        <div className="font-medium">{condition}</div>
                         <p className="text-sm text-muted-foreground">
-                          Headache and fever are common symptoms of viral infections like the common cold or flu.
+                          Multiple symptoms you selected are associated with {condition}.
                         </p>
                       </div>
-                    )}
+                    ))}
                     
-                    {selectedSymptoms.includes("Cough") && selectedSymptoms.includes("Shortness of breath") && (
-                      <div className="p-3 border rounded-md mb-2">
-                        <div className="font-medium">Respiratory Infection</div>
-                        <p className="text-sm text-muted-foreground">
-                          Coughing and shortness of breath may indicate a respiratory infection or condition.
-                        </p>
-                      </div>
-                    )}
-                    
-                    {selectedSymptoms.includes("Nausea") && selectedSymptoms.includes("Vomiting") && (
-                      <div className="p-3 border rounded-md mb-2">
-                        <div className="font-medium">Gastroenteritis</div>
-                        <p className="text-sm text-muted-foreground">
-                          Nausea and vomiting are common with gastroenteritis or food poisoning.
-                        </p>
-                      </div>
-                    )}
-                    
-                    {/* Default response if no specific combination matched */}
-                    {!((selectedSymptoms.includes("Headache") && selectedSymptoms.includes("Fever")) || 
-                       (selectedSymptoms.includes("Cough") && selectedSymptoms.includes("Shortness of breath")) ||
-                       (selectedSymptoms.includes("Nausea") && selectedSymptoms.includes("Vomiting"))) && (
+                    {getPossibleConditions().length === 0 && (
                       <div className="p-3 border rounded-md">
                         <div className="font-medium">Multiple Possibilities</div>
                         <p className="text-sm text-muted-foreground">
@@ -196,6 +271,18 @@ const Symptoms = () => {
                         </p>
                       </div>
                     )}
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-2">Diet Recommendations</h3>
+                    <ul className="list-disc pl-5 space-y-1 text-sm">
+                      {getDietRecommendations().map((recommendation, index) => (
+                        <li key={index}>{recommendation}</li>
+                      ))}
+                      {getDietRecommendations().length === 0 && (
+                        <li>Maintain a balanced diet with plenty of fluids</li>
+                      )}
+                    </ul>
                   </div>
                   
                   <div>
@@ -224,7 +311,7 @@ const Symptoms = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button variant="outline" onClick={() => setShowResults(false)}>
+                <Button variant="outline" onClick={() => setCurrentTab("select")}>
                   Back to Symptoms
                 </Button>
                 <Button onClick={() => window.location.href = "/chat"}>
