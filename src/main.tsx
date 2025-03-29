@@ -30,4 +30,4 @@ root.render(
 );
 
 // If you want to start measuring performance, uncomment the function call
-// reportWebVitals();
+reportWebVitals();

@@ -23,15 +23,33 @@ export default defineConfig(({ mode }) => ({
   build: {
     minify: 'terser',
     sourcemap: false,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@/components/ui'],
-          'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'radix-vendor';
+            }
+            if (id.includes('firebase')) {
+              return 'firebase';
+            }
+            if (id.includes('lucide')) {
+              return 'icons';
+            }
+            return 'vendor';
+          }
+          if (id.includes('components/ui')) {
+            return 'ui';
+          }
         }
       }
     }
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@radix-ui/react-icons']
   }
 }));
