@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Mail, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,7 +33,7 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 const Signup = () => {
-  const { signup, googleSignIn } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const intl = useIntl();
@@ -61,18 +61,6 @@ const Signup = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setLoading(true);
-      await googleSignIn();
-      navigate('/');
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-health-light p-4">
       <Card className="w-full max-w-md">
@@ -85,29 +73,6 @@ const Signup = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-            >
-              <Mail className="mr-2 h-4 w-4" />
-              <FormattedMessage id="auth.googleSignup" />
-            </Button>
-          </div>
-          
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                <FormattedMessage id="auth.continueWith" />
-              </span>
-            </div>
-          </div>
-          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField

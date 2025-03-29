@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Mail, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +28,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const { login, googleSignIn, resetPassword } = useAuth();
+  const { login, resetPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
@@ -59,18 +59,6 @@ const Login = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setLoading(true);
-      await googleSignIn();
-      navigate(from, { replace: true });
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleResetPassword = async () => {
     if (!resetEmail) return;
     
@@ -93,17 +81,6 @@ const Login = () => {
           <CardDescription>Login to your HealthChat account</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField

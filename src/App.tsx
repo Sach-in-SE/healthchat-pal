@@ -32,15 +32,11 @@ const App = () => {
               <Sonner />
               <Routes>
                 {/* Public routes */}
+                <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
                 {/* Protected routes */}
-                <Route path="/" element={
-                  <PrivateRoute>
-                    <Index />
-                  </PrivateRoute>
-                } />
                 <Route path="/chat" element={
                   <PrivateRoute>
                     <Chat />
