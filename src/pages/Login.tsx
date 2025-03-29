@@ -93,18 +93,6 @@ const Login = () => {
           <CardDescription>Login to your HealthChat account</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-            >
-              <Mail className="mr-2 h-4 w-4" />
-              Continue with Google
-            </Button>
-          </div>
-          
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
