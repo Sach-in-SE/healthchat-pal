@@ -1,53 +1,31 @@
 
-// This is a placeholder service that simulates AI responses
-// In a real implementation, this would connect to an API like OpenAI
+import { sendChatMessage } from './chat-service';
+import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from '@/contexts/AuthContext';
 
-const RESPONSE_DELAY = 1000; // Simulated delay in milliseconds
-
-const healthResponses = [
-  "Based on your symptoms, it sounds like you might be experiencing a common cold. Rest, hydration, and over-the-counter medications can help manage your symptoms. If they persist for more than a week, consider consulting with a healthcare provider.",
+// This is a simple function to generate responses without actual API calls
+// for development and testing when the API is not available
+export async function generateAIResponse(message: string): Promise<string> {
+  // Simulate API response time
+  await new Promise(resolve => setTimeout(resolve, 1000));
   
-  "Your symptoms could be related to seasonal allergies. I'd recommend avoiding known allergens, trying an over-the-counter antihistamine, and keeping indoor air clean. If symptoms worsen, a doctor can help with prescription options.",
+  // Basic response patterns based on keywords in the message
+  if (message.toLowerCase().includes('cold') || message.toLowerCase().includes('flu')) {
+    return "Common cold symptoms typically include runny nose, sneezing, and mild fatigue, while flu symptoms are more severe with fever, body aches, and extreme fatigue. The flu tends to come on suddenly while a cold develops gradually. If you're experiencing symptoms, make sure to rest, stay hydrated, and consult a healthcare professional if symptoms worsen.";
+  }
   
-  "It's important to maintain a balanced diet rich in fruits, vegetables, whole grains, and lean proteins. Aim for 150 minutes of moderate exercise weekly, stay hydrated, and ensure you're getting 7-9 hours of quality sleep each night.",
+  if (message.toLowerCase().includes('diet') || message.toLowerCase().includes('diabetes')) {
+    return "For type 2 diabetes, a balanced diet should focus on consistent carbohydrate intake, emphasizing complex carbs with high fiber. Include lean proteins with each meal, limit added sugars and processed foods, and monitor portion sizes. Regular meal timing is important to maintain stable blood sugar levels. Always consult with a registered dietitian or your healthcare provider for personalized guidance.";
+  }
   
-  "For stress management, consider practicing mindfulness meditation, deep breathing exercises, or progressive muscle relaxation. Regular physical activity, adequate sleep, and connecting with supportive people can also significantly reduce stress levels.",
+  if (message.toLowerCase().includes('anxious') || message.toLowerCase().includes('anxiety')) {
+    return "It's common to experience anxiety. Some helpful strategies include: practicing deep breathing exercises, progressive muscle relaxation, mindfulness meditation, regular physical activity, maintaining a consistent sleep schedule, limiting caffeine and alcohol, and connecting with supportive people. If anxiety is significantly affecting your daily life, consider speaking with a mental health professional for additional support and treatment options.";
+  }
   
-  "While I can provide general health information, I'm not a replacement for professional medical advice. If you're experiencing concerning symptoms, please consult with a healthcare provider for proper diagnosis and treatment.",
+  if (message.toLowerCase().includes('back pain') || message.toLowerCase().includes('exercise')) {
+    return "For lower back pain, gentle exercises that strengthen core muscles can be helpful: try walking, swimming, or stationary biking for low-impact cardio. Specific exercises like partial crunches, bridge exercises, and gentle stretching of back and hamstring muscles can provide relief. Always start slowly and stop if pain increases. Consider consulting a physical therapist for personalized recommendations based on your specific condition.";
+  }
   
-  "A Mediterranean-style diet has been shown to support heart health. This includes plenty of fruits, vegetables, whole grains, fish, olive oil, and nuts, while limiting red meat, processed foods, and added sugars.",
-  
-  "Regular screenings are important for preventive health. Depending on your age, gender, and risk factors, these might include blood pressure, cholesterol, diabetes, various cancers, and mental health assessments. Your primary care provider can recommend an appropriate screening schedule.",
-  
-  "For improving sleep quality, maintain a consistent sleep schedule, create a restful environment, limit daytime naps, manage stress, and avoid caffeine, alcohol, and large meals before bedtime. If sleep problems persist, consider speaking with a healthcare provider.",
-];
-
-export const generateAIResponse = async (userMessage: string): Promise<string> => {
-  // In a real implementation, this would send the user message to an API
-  // and return the response
-  
-  // For now, we'll simulate a response with a delay
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Simplified response selection - in a real app, this would be a call to an AI API
-      const randomResponse = healthResponses[Math.floor(Math.random() * healthResponses.length)];
-      
-      // Attempt basic contextual responses for common health questions
-      let response = randomResponse;
-      
-      const lowerMessage = userMessage.toLowerCase();
-      
-      if (lowerMessage.includes("headache") || lowerMessage.includes("head pain")) {
-        response = "Headaches can have many causes, including stress, dehydration, lack of sleep, or eye strain. For occasional headaches, rest, hydration, and over-the-counter pain relievers may help. If you're experiencing severe, persistent, or unusual headaches, particularly if they're accompanied by other symptoms like fever, confusion, or vision changes, you should seek medical attention promptly.";
-      } else if (lowerMessage.includes("diet") || lowerMessage.includes("nutrition") || lowerMessage.includes("food")) {
-        response = "A balanced diet typically includes a variety of fruits and vegetables, whole grains, lean proteins, and healthy fats. It's generally recommended to limit processed foods, added sugars, and excessive sodium. Individual dietary needs can vary based on factors like age, sex, activity level, and health conditions. If you have specific dietary concerns or requirements, consulting with a registered dietitian can provide personalized guidance.";
-      } else if (lowerMessage.includes("exercise") || lowerMessage.includes("workout")) {
-        response = "Regular physical activity is important for overall health. Adults are generally recommended to get at least 150 minutes of moderate-intensity aerobic activity or 75 minutes of vigorous activity each week, along with muscle-strengthening activities at least twice a week. If you're new to exercise or have health concerns, start slowly and consider consulting with a healthcare provider before beginning a new exercise regimen.";
-      } else if (lowerMessage.includes("stress") || lowerMessage.includes("anxiety") || lowerMessage.includes("depress")) {
-        response = "Mental health is as important as physical health. Stress, anxiety, and depression are common conditions that can benefit from various approaches, including therapy, lifestyle changes, and sometimes medication. Techniques like mindfulness meditation, deep breathing exercises, regular physical activity, and ensuring adequate sleep can help manage stress and anxiety. If you're experiencing persistent mental health concerns, please reach out to a mental health professional for proper assessment and support.";
-      }
-      
-      resolve(response);
-    }, RESPONSE_DELAY);
-  });
-};
+  // Default response for other queries
+  return "Thank you for your question. While I can provide general health information, remember that I'm an AI assistant and not a substitute for professional medical advice. For personalized guidance, please consult with a healthcare provider. Is there something specific about this topic you'd like to know more about?";
+}

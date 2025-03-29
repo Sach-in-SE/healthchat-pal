@@ -1,17 +1,12 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import ChatMessage, { Message } from './ChatMessage';
+import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import { generateAIResponse } from '@/lib/ai-service';
+import { useChat } from './ChatService';
 
-interface ChatContainerProps {
-  initialMessages?: Message[];
-}
-
-const ChatContainer = ({ initialMessages = [] }: ChatContainerProps) => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [isProcessing, setIsProcessing] = useState(false);
+const ChatContainer = () => {
+  const { messages, sending, sendMessage } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,48 +15,6 @@ const ChatContainer = ({ initialMessages = [] }: ChatContainerProps) => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleSendMessage = async (content: string) => {
-    // Add user message
-    const userMessage: Message = {
-      id: uuidv4(),
-      role: 'user',
-      content,
-      timestamp: new Date(),
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setIsProcessing(true);
-    
-    try {
-      // Simulating AI response
-      const aiResponse = await generateAIResponse(content);
-      
-      // Add AI response
-      const assistantMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: aiResponse,
-        timestamp: new Date(),
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error generating AI response:', error);
-      
-      // Add error message
-      const errorMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: "I'm sorry, I encountered an error while processing your request. Please try again later.",
-        timestamp: new Date(),
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsProcessing(false);
-    }
   };
 
   return (
@@ -90,7 +43,7 @@ const ChatContainer = ({ initialMessages = [] }: ChatContainerProps) => {
                 <button
                   key={i}
                   className="text-left p-3 border rounded-lg hover:bg-muted transition-colors text-sm"
-                  onClick={() => handleSendMessage(suggestion)}
+                  onClick={() => sendMessage(suggestion)}
                 >
                   {suggestion}
                 </button>
@@ -104,7 +57,7 @@ const ChatContainer = ({ initialMessages = [] }: ChatContainerProps) => {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <ChatInput onSendMessage={handleSendMessage} isProcessing={isProcessing} />
+      <ChatInput onSendMessage={sendMessage} isProcessing={sending} />
     </div>
   );
 };
